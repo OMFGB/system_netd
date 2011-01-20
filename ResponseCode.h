@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2008 The Android Open Source Project
+ * Copyright (c) 2010, Code Aurora Forum. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +41,7 @@ public:
     static const int InterfaceTxCounterResult  = 217;
     static const int InterfaceRxThrottleResult = 218;
     static const int InterfaceTxThrottleResult = 219;
+    static const int RouteConfigurationResult  = 220;
 
     // 400 series - The command was accepted but the requested action
     // did not take place.

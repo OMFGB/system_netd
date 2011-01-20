@@ -22,7 +22,8 @@ LOCAL_SRC_FILES:=                                      \
                   PanController.cpp                    \
                   SoftapController.cpp                 \
                   UsbController.cpp                    \
-                  ThrottleController.cpp
+                  ThrottleController.cpp               \
+                  RouteController.cpp
 
 LOCAL_MODULE:= netd
 
