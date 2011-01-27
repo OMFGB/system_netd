@@ -127,6 +127,10 @@ int RouteController::addDstRoute
                  "route add %s dev %s", dstPrefix, iface);
     }
 
+    // Blindly do this as addition of duplicate route fails; we want
+    // add to succeed if the requested route exists. So delete prior to add
+    delDstRoute(dstPrefix);
+
     int r = runIpCmd(buffer);
 
     if (r == 0)

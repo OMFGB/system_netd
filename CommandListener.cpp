@@ -763,13 +763,12 @@ int CommandListener::RouteCmd::runCommand(SocketClient *cli,
                                     gateway, routeId, ipVer) != 0) {
                 asprintf(&tmp,"failed to set route for route id [%s]",routeId);
                 cli->sendMsg(ResponseCode::OperationFailed,tmp,true);
-                free(tmp);
             } else {
                 asprintf(&tmp,
                      "source route replace succeeded for route id [%s]",routeId);
                 cli->sendMsg(ResponseCode::CommandOkay,tmp,false);
-                free(tmp);
             }
+            free(tmp);
         } else if (!strcmp(argv[1], "del")) {
             if (argc != 5) {
                 cli->sendMsg(ResponseCode::CommandSyntaxError,
@@ -791,13 +790,12 @@ int CommandListener::RouteCmd::runCommand(SocketClient *cli,
                 asprintf(&tmp,
                     "failed to delete source route for route id [%s]",argv[4]);
                 cli->sendMsg(ResponseCode::OperationFailed,tmp, true);
-                free(tmp);
             } else {
                 asprintf(&tmp,
                     "source route delete succeeded for route id [%s]",argv[4]);
                 cli->sendMsg(ResponseCode::CommandOkay,tmp,false);
-                free(tmp);
             }
+            free(tmp);
 
         } else {
             cli->sendMsg(ResponseCode::CommandSyntaxError,
@@ -851,13 +849,12 @@ int CommandListener::RouteCmd::runCommand(SocketClient *cli,
                 asprintf(&tmp,"failed to replace default route"
                                 " for [%s %s]", iface, ipVer);
                 cli->sendMsg(ResponseCode::OperationFailed,tmp,true);
-                free(tmp);
             } else {
                 asprintf(&tmp,"default route replace succeeded "
                                 "for [%s %s]", iface, ipVer);
                 cli->sendMsg(ResponseCode::CommandOkay,tmp,false);
-                free(tmp);
             }
+            free(tmp);
 
         } else {
             cli->sendMsg(ResponseCode::CommandSyntaxError,
@@ -869,7 +866,7 @@ int CommandListener::RouteCmd::runCommand(SocketClient *cli,
         if (!strcmp(argv[1], "add")) {
             if (argc != 6 && argc != 7) {
                 cli->sendMsg(ResponseCode::CommandSyntaxError,
-                   "Usage: route add dst v[4|6]"
+                   "Usage: route dst add v[4|6]"
                    " <interface> <ipaddr> [<gateway>]", false);
                 return 0;
             }
@@ -916,13 +913,12 @@ int CommandListener::RouteCmd::runCommand(SocketClient *cli,
                 asprintf(&tmp,"failed to set route for destination "
                               "[%s %s]", iface, dstPrefix);
                 cli->sendMsg(ResponseCode::OperationFailed,tmp,true);
-                free(tmp);
             } else {
                 asprintf(&tmp,"destination route add succeeded "
                               "for [%s %s]",iface, dstPrefix);
                 cli->sendMsg(ResponseCode::CommandOkay,tmp,false);
-                free(tmp);
             }
+            free(tmp);
         } else if (!strcmp(argv[1], "del")) {
             if (argc != 5) {
                 cli->sendMsg(ResponseCode::CommandSyntaxError,
@@ -946,13 +942,12 @@ int CommandListener::RouteCmd::runCommand(SocketClient *cli,
                 asprintf(&tmp, "failed to delete destination "
                                "route for [%s]", argv[4]);
                 cli->sendMsg(ResponseCode::OperationFailed,tmp, true);
-                free(tmp);
             } else {
                 asprintf(&tmp,
                     "destination route delete succeeded for [%s]", argv[4]);
                 cli->sendMsg(ResponseCode::CommandOkay,tmp,false);
-                free(tmp);
             }
+            free(tmp);
 
         } else {
             cli->sendMsg(ResponseCode::CommandSyntaxError,
