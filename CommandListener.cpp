@@ -878,14 +878,14 @@ int CommandListener::RouteCmd::runCommand(SocketClient *cli,
             unsigned flags = 0;
 
             /* verify if interface is UP */
-	    ifc_init();
+            ifc_init();
             if (ifc_get_info(argv[4], &addr.s_addr, &mask.s_addr, &flags) ||
                             !(flags & IFF_UP)) {
                 cli->sendMsg(ResponseCode::CommandParameterError,
                              "Interface is down|not found", false);
                 return 0;
             }
-	    ifc_close();
+            ifc_close();
 
             if (inet_pton(domain, argv[5], d) < 1) {
                 cli->sendMsg(ResponseCode::CommandParameterError,
@@ -909,15 +909,19 @@ int CommandListener::RouteCmd::runCommand(SocketClient *cli,
 
             char *tmp = NULL;
 
-            if (sRouteCtrl->addDstRoute(iface, dstPrefix, gateway) != 0) {
+            //FIXME remove comments once IPV6 kernel issues for default routes are
+            //resolved. Until then ignore preexisting route addition error.Ignore
+            //the error here, rather than in RouteController since the validity of
+            //arguments is performed here.
+            /*if (*/sRouteCtrl->addDstRoute(iface, dstPrefix, gateway);/* != 0) {
                 asprintf(&tmp,"failed to set route for destination "
                               "[%s %s]", iface, dstPrefix);
                 cli->sendMsg(ResponseCode::OperationFailed,tmp,true);
-            } else {
+            } else {*/
                 asprintf(&tmp,"destination route add succeeded "
                               "for [%s %s]",iface, dstPrefix);
                 cli->sendMsg(ResponseCode::CommandOkay,tmp,false);
-            }
+            /*}*/
             free(tmp);
         } else if (!strcmp(argv[1], "del")) {
             if (argc != 5) {

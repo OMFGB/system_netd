@@ -128,7 +128,8 @@ int RouteController::addDstRoute
     }
 
     // Blindly do this as addition of duplicate route fails; we want
-    // add to succeed if the requested route exists. So delete prior to add
+    // add to succeed if the requested route exists and logwrapper
+    // does not set errno to EEXIST. So delete prior to add
     delDstRoute(dstPrefix);
 
     int r = runIpCmd(buffer);
