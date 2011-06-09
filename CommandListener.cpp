@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2008 The Android Open Source Project
- * Copyright (c) 2010, Code Aurora Forum. All rights reserved.
+ * Copyright (c) 2010, 2011 Code Aurora Forum. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,9 @@
 #include "ResponseCode.h"
 #include "ThrottleController.h"
 
+#ifndef INET_ADDRSTRLEN
+#define INET_ADDRSTRLEN 16
+#endif
 
 extern "C" int ifc_init(void);
 extern "C" void ifc_close(void);
@@ -688,7 +691,7 @@ int CommandListener::RouteCmd::runCommand(SocketClient *cli,
         return 0;
     }
 
-    char *ipVer = NULL;
+    const char *ipVer = NULL;
     int domain;
 
     if (!strcmp(argv[3], "v4")) {
@@ -732,9 +735,10 @@ int CommandListener::RouteCmd::runCommand(SocketClient *cli,
                             !(flags & IFF_UP)) {
                 cli->sendMsg(ResponseCode::CommandParameterError,
                              "Interface is down|not found", false);
+                ifc_close();
                 return 0;
             }
-	    ifc_close();
+            ifc_close();
 
             if (inet_pton(domain, argv[5], s) < 1) {
                 cli->sendMsg(ResponseCode::CommandParameterError,
@@ -745,6 +749,7 @@ int CommandListener::RouteCmd::runCommand(SocketClient *cli,
             char *iface = argv[4],
                  *srcPrefix = argv[5],
                  *routeId = argv[6],
+                 *network = NULL,
                  *gateway = NULL;
 
             if (argc > 7) {
@@ -757,17 +762,48 @@ int CommandListener::RouteCmd::runCommand(SocketClient *cli,
                 }
             }
 
-            char *tmp = NULL;
+            // compute the network block in CIDR notation (for IPv4 only)
+            if (domain == AF_INET) {
+                struct in_addr net;
+                net.s_addr = (addr.s_addr & mask.s_addr);
 
+                int prefix_length = 0;
+                uint32_t n = mask.s_addr;
+                while (n > 0) {
+                    if ((n % 2) == 1) prefix_length++;
+                    n /= 2;
+                }
+
+                char net_s[INET_ADDRSTRLEN];
+                inet_ntop(AF_INET, &(net.s_addr), net_s, INET_ADDRSTRLEN);
+                asprintf(&network, "%s/%d", net_s, prefix_length);
+            }
+
+            char *tmp = NULL;
             if (sRouteCtrl->repSrcRoute(iface, srcPrefix,
                                     gateway, routeId, ipVer) != 0) {
                 asprintf(&tmp,"failed to set route for route id [%s]",routeId);
                 cli->sendMsg(ResponseCode::OperationFailed,tmp,true);
             } else {
-                asprintf(&tmp,
-                     "source route replace succeeded for route id [%s]",routeId);
-                cli->sendMsg(ResponseCode::CommandOkay,tmp,false);
+                if (network != NULL) {
+                     // gateway should be null as traffic is on same subnet
+                    if (sRouteCtrl->addDstRoute(iface, network, NULL, routeId) != 0) {
+                        asprintf(&tmp,
+                             "source route replace succeeded for route id [%s]"
+                             ", but local destination routing failed", routeId);
+                    } else {
+                        asprintf(&tmp,
+                             "source route replace succeeded for route id [%s]"
+                             ", and local destination routing succeeded", routeId);
+                    }
+                    cli->sendMsg(ResponseCode::CommandOkay,tmp,false);
+                } else {
+                    asprintf(&tmp,
+                         "source route replace succeeded for route id [%s]", routeId);
+                    cli->sendMsg(ResponseCode::CommandOkay,tmp,false);
+                }
             }
+            free(network);
             free(tmp);
         } else if (!strcmp(argv[1], "del")) {
             if (argc != 5) {

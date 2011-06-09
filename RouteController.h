@@ -1,4 +1,4 @@
-/* Copyright (c) 2010, Code Aurora Forum. All rights reserved.
+/* Copyright (c) 2010, 2011 Code Aurora Forum. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -52,11 +52,13 @@ public:
     (
         const char *iface,
         const char *dstPrefix,
-        const char *gateway
+        const char *gateway,
+        const char *table = MAIN_TABLE
     );
     int delDstRoute
     (
-        const char *dstPrefix
+        const char *dstPrefix,
+        const char *table = MAIN_TABLE
     );
     int replaceDefRoute
     (
@@ -66,6 +68,8 @@ public:
     );
 
 private:
+    const static char *MAIN_TABLE;
+
     int runIpCmd
     (
         const char *cmd

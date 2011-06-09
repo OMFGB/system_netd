@@ -1,4 +1,4 @@
-/* Copyright (c) 2010, Code Aurora Forum. All rights reserved.
+/* Copyright (c) 2010, 2011 Code Aurora Forum. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -48,7 +48,7 @@
 
 static char IP_PATH[] = "/system/bin/ip";
 
-const static char *MAIN_TABLE = "254";
+const char *RouteController::MAIN_TABLE = "254";
 
 extern "C" int logwrap(int argc, const char **argv, int background);
 
@@ -113,24 +113,25 @@ int RouteController::addDstRoute
 (
     const char *iface,
     const char *dstPrefix,
-    const char *gateway
+    const char *gateway,
+    const char *table
 )
 {
     char buffer[255];
 
     if (gateway) {
         snprintf(buffer, sizeof buffer,
-                 "route add %s via %s dev %s scope global",
-                 dstPrefix, gateway, iface);
+                 "route add %s via %s dev %s scope global table %s",
+                 dstPrefix, gateway, iface, table);
     } else {
         snprintf(buffer, sizeof buffer,
-                 "route add %s dev %s", dstPrefix, iface);
+                 "route add %s dev %s table %s", dstPrefix, iface, table);
     }
 
     // Blindly do this as addition of duplicate route fails; we want
     // add to succeed if the requested route exists and logwrapper
     // does not set errno to EEXIST. So delete prior to add
-    delDstRoute(dstPrefix);
+    delDstRoute(dstPrefix, table);
 
     int r = runIpCmd(buffer);
 
@@ -142,11 +143,12 @@ int RouteController::addDstRoute
 
 int RouteController::delDstRoute
 (
-    const char *dstPrefix
+    const char *dstPrefix,
+    const char *table
 )
 {
     char buffer[255];
-    snprintf(buffer, sizeof buffer, "route del %s", dstPrefix);
+    snprintf(buffer, sizeof buffer, "route del %s table %s", dstPrefix, table);
 
     int r = runIpCmd(buffer);
 
